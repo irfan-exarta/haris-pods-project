@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <style>
+      .overlay-element {
+        pointer-events: auto !important;
+        user-select: none !important;
+      }
+
+      #application-canvas {
+        pointer-events: auto;
+        touch-action: none;
+      }
+    </style>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://www.youtube.com" />
+    <title>Vite + React</title>
+  </head>
+  <body id="root">
+    <!-- <canvas id="application-canvas"> </canvas> -->
+    <div></div>
+    <script>
+      // Setup global UI interaction handlers
+      document.addEventListener('DOMContentLoaded', function () {
+        // Block all events from overlay elements to canvas
+        document.querySelectorAll('.overlay-element').forEach((element) => {
+          [
+            'mousedown',
+            'mouseup',
+            'mousemove',
+            'touchstart',
+            'touchmove',
+            'touchend',
+            'click',
+          ].forEach((eventType) => {
+            element.addEventListener(
+              eventType,
+              (e) => {
+                e.stopPropagation();
+                window.uiInteractionActive = true;
+
+                // Reset after a small delay
+                if (['mouseup', 'touchend'].includes(eventType)) {
+                  setTimeout(() => {
+                    window.uiInteractionActive = false;
+                  }, 50);
+                }
+              },
+              true,
+            );
+          });
+        });
+      });
+    </script>
+    <input type="file" id="frameFileInput" accept="image/*" style="display: none" />
+    <input type="file" id="modelFileInput" accept=".glb, .gltf" style="display: none" />
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

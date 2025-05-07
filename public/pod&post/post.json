@@ -1,0 +1,136 @@
+{
+  "userId": 1234,
+  "postType": "private",
+  "postName": "",
+  "postDescription": "",
+  "postTags": [],
+  "postDisplayImage": "https://object.ord1.coreweave.com/pods-bucket/pods/CafeHub101/render.jpg",
+  "podId": 4520,
+  "podName": "CafeHub101",
+  "postAssets": {
+    "frames": [
+      {
+        "frameId": 942476288,
+        "position": {
+          "x": 0.1,
+          "y": 0.4724713734232854,
+          "z": 2.4942943598406875
+        },
+        "rotation": {
+          "x": -90,
+          "y": -90,
+          "z": 90
+        },
+        "scale": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.5
+        },
+        "assetUrl": "https://object.ord1.coreweave.com/pods-bucket/123/942476288.png-Outer_Left_Wall"
+      },
+      {
+        "frameId": 21048091,
+        "position": {
+          "x": -2.1986613992295485,
+          "y": 2.8277416190774844,
+          "z": 0.19
+        },
+        "rotation": {
+          "x": -180,
+          "y": 0,
+          "z": -180
+        },
+        "scale": {
+          "x": 0.5,
+          "y": 0.5,
+          "z": 0.5
+        },
+        "assetUrl": "https://object.ord1.coreweave.com/pods-bucket/123/21048091.mp4-Outer_Right_Wall"
+      }
+    ],
+    "iframes": [
+      {
+        "position": {
+          "x": 7.796,
+          "y": 2.584,
+          "z": -4.2
+        },
+        "rotation": {
+          "x": 90,
+          "y": 0,
+          "z": 0
+        },
+        "scale": {
+          "x": 2.691,
+          "y": 2,
+          "z": 1.605
+        },
+        "iframeUrl": "https://www.youtube.com/embed/74cVT_tUpck?si=_TpPt3UNbn0sqQOD"
+      }
+    ],
+    "Assets3d": [
+      {
+        "assetId": 615343103,
+        "assetSize": "2138 KB",
+        "position": {
+          "x": 3.16,
+          "y": -5.097136408666362,
+          "z": -2.056830383345782
+        },
+        "rotation": {
+          "x": 90,
+          "y": 180,
+          "z": 90
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        },
+        "Asset3dUrl": "https://object.ord1.coreweave.com/pods-bucket/123/615343103.glb-Outer_Back_Right_Wall"
+      }
+    ],
+    "ambientSound": {
+      "soundId": 12345,
+      "soundSize": "40 KB",
+      "soundName": "Sound Name",
+      "soundDescription": "Sound Description",
+      "soundUrl": "https://sound_url.com"
+    },
+    "textures": [
+      {
+        "textureId": 12345,
+        "parentEntityName": "",
+        "textureSize": "40 KB",
+        "textureName": "Texture Name",
+        "textureAsset": "Asset Name",
+        "textureUrl": "https://texture_url.com"
+      }
+    ],
+    "textAssets": [
+      {
+        "textAssetId": 12345,
+        "textAssetSize": "40 KB",
+        "textAssetName": "Text Asset Name",
+        "textAssetText": "Text Asset Description",
+        "textFont": "font",
+        "textAssetPosition": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "textAssetRotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "textAssetScale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        },
+        "textAssetAlignment": "left"
+      }
+    ]
+  }
+}

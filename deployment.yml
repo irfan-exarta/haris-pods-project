@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hiryali
+  namespace: tenant-7654b5-asrpods
+  labels:
+    app: hiryali
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hiryali
+  template:
+    metadata:
+      labels:
+        app: hiryali
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.coreweave.cloud/cpu
+                    operator: In
+                    values:
+                      - intel-xeon-v3
+      containers:
+        - name: hiryali
+          image: exartadev/zeniva.exarta:hiryali-v73-asrpods
+          ports:
+            - containerPort: 5173
+          resources:
+            requests:
+              cpu: 1
+              memory: 4Gi
+            limits:
+              cpu: 1
+              memory: 4Gi
+          imagePullPolicy: Always
+      imagePullSecrets:
+        - name: dockerhub-secret
+      restartPolicy: Always

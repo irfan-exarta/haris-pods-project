@@ -1,135 +1,131 @@
-// import * as pc from 'playcanvas';
-// export function SetSkyboxDds(app, podName) {
-//   app.scene.exposure = 1.4; // Matches "Exposure: 0.3"
-//   app.scene.root = app;
+//import * as pc from 'playcanvas';
 
-//   // app.graphicsDevice.maxPixelRatio = window.devicePixelRatio;
-//   // app.graphicsDevice.antialias = true; // Matches "Anti-Alias" enabled
+//export function SetSkyboxDds(app) {
+//  return new Promise((resolve, reject) => {
+//    const skyboxAsset = new pc.Asset(
+//      'skybox',
+//      'cubemap',
+//      {
+//        url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/cubemap.dds',
+//      },
+//      {
+//        prefiltered: true,
+//        type: pc.SKYTYPE_INFINITE,
+//        filtering: pc.FILTER_LINEAR,
+//        rgbm: false,
+//      },
+//    );
 
-//   app.scene.skyboxMip = 0;
-//   app.scene.skyboxIntensity = 1; // Matches Intensity
-//   // app.scene.clusteredLightingEnabled = true;
-//   // app.scene.lighting.cells = new pc.Vec3(10, 3, 10);
+//    skyboxAsset.once('load', () => {
+//      console.log(skyboxAsset);
+//      const cubemap = skyboxAsset.resources?.[1];
 
-//   // // console.log(app.scene.lighting);
-//   // app.scene.lighting.maxLightsPerCell = 255;
-//   // app.scene.lighting.shadowsEnabled = true;
-//   // app.scene.lighting.shadowAtlasResolution = 2048;
-//   // app.scene.lighting.shadowType = pc.SHADOW_PCF3_16F;
+//      if (!cubemap) {
+//        reject(new Error('Cubemap resource missing or incorrectly indexed'));
+//        return;
+//      }
 
-//   app.scene.ambientLight = new pc.Color(0.2, 0.2, 0.2, 1);
-//   // app.scene.ambientLuminance = 1;
-//   // app.scene.lightmapHDR = true;
-//   // app.scene.lightmapMode = 0;
+//      app.scene.exposure = 1.4;
+//      app.scene.skyboxMip = 0;
+//      app.scene.skyboxIntensity = 1;
+//      app.scene.ambientLight = new pc.Color(3, 3, 3);
+//      app.scene.skybox = cubemap;
+//      app.scene.setSkybox(skyboxAsset.resources);
 
-//   console.log(app.scene.sky);
-//   // console.log(app.scene.fog);
-//   // app.scene.lightmapSizeMultiplier = 16;
-//   // app.scene.lightmapMaxResolution = 2048;
-//   // app.scene.lightmapMode = 1;
+//      resolve(cubemap);
+//    });
 
-//   const skybox = new pc.Asset(
-//     'cubemap.dds',
-//     'cubemap',
-//     {
-//       url: `/models/${podName}/skybox/cubemap.dds`,
-//     },
-//     {
-//       textures: [
-//         `/models/${podName}/skybox/px.png`,
-//         `/models/${podName}/skybox/nx.png`,
-//         `/models/${podName}/skybox/py.png`,
-//         `/models/${podName}/skybox/ny.png`,
-//         `/models/${podName}/skybox/pz.png`,
-//         `/models/${podName}/skybox/nz.png`,
-//       ],
+//    skyboxAsset.once('error', (err) => {
+//      reject(err);
+//    });
 
-//       type: pc.SKYTYPE_INFINITE,
-//       // mipmaps: true,
-//       filtering: pc.FILTER_LINEAR,
-//       name: 'cubemap.dds',
-//       minFilter: 5,
-//       magFilter: 1,
-//       anisotropy: 1,
-//       rgbm: false,
-//       prefiltered: 'cubemap.dds',
-//     },
-//   );
-//   app.assets.add(skybox);
-//   app.assets.load(skybox);
-
-//   // const skyboxAsset = new pc.Asset("skybox", "cubemap", {
-//   //   url: "/skyboxes/sky.png", // Skybox texture path
-//   //   // mipmaps: false,
-//   // });
-
-//   // console.log(skybox);
-
-//   skybox.on('load', function () {
-//     // const skyLayer = app.scene.layers.getLayerById(pc.LAYERID_SKYBOX);
-//     console.log(skybox);
-//     //skyLayer.enabled = true;
-//     // app.renderNextFrame = true;
-//     // skybox.resources[0].type = 'default';
-//     // skybox.resources[1].type = 'rgbm';
-//     // skybox.resources[2].type = 'rgbm';
-//     // skybox.resources[3].type = 'rgbm';
-//     // skybox.resources[4].type = 'rgbm';
-//     // skybox.resources[5].type = 'rgbm';
-//     // skybox.resources[6].type = 'rgbm';
-//     app.scene.setSkybox(skybox.resources);
-//     // console.log(skybox.resources);
-
-//     // app.scene.envAtlas = skybox.resource;
-//     // app.scene.skyboxMip = 0; // Matches Mip level 1
-
-//     // console.log("Skybox and scene settings applied.");
-//   });
-
-//   //   Add the asset to the asset registry and load it
-//   // app.assets.add(skyboxAsset);
-//   // app.assets.load(skyboxAsset);
-// }
+//    app.assets.add(skyboxAsset);
+//    app.assets.load(skyboxAsset);
+//  });
+//}
 
 import * as pc from 'playcanvas';
 
-export function SetSkyboxDds(app, podDetails) {
-  console.log(podDetails);
-  // const podName = podDetails.podName;
-  const skyboxUrl = podDetails;
-  app.scene.exposure = 1.4;
-  app.scene.skyboxMip = 0;
-  app.scene.skyboxIntensity = 1;
-  app.scene.ambientLight = new pc.Color(1, 1, 1, 1);
+export function SetSkyboxDds(app, skyboxUrl, cubemapUrl) {
+  return new Promise((resolve, reject) => {
+    // Load the skybox
+    const skyboxAsset = new pc.Asset(
+      'skybox',
+      'cubemap',
+      {
+        url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/skybox.dds',
+      },
+      {
+        prefiltered: true,
+        type: pc.SKYTYPE_INFINITE,
+        filtering: pc.FILTER_LINEAR,
+        rgbm: false,
+      },
+    );
 
-  const skybox = new pc.Asset(
-    'cubemap.dds',
-    'cubemap',
-    {
-      url: '/hdri1.dds',
-      // url: 'skybox.dds',
-      // contents: skyboxUrl,
-    },
-    {
-      type: pc.SKYTYPE_INFINITE,
-      filtering: pc.FILTER_LINEAR,
-      name: 'cubemap.dds',
-      minFilter: pc.FILTER_LINEAR_MIPMAP_LINEAR,
-      magFilter: pc.FILTER_LINEAR,
-      anisotropy: 1,
-      rgbm: false,
-      prefiltered: 'cubemap.dds',
-    },
-  );
+    // Load the cubemap for reflection
+    const reflectionAsset = new pc.Asset(
+      'reflection',
+      'cubemap',
+      {
+        url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/cubemap.dds',
+      },
+      {
+        prefiltered: true,
+        type: pc.SKYTYPE_INFINITE,
+        filtering: pc.FILTER_LINEAR,
+        rgbm: false,
+      },
+    );
 
-  app.assets.add(skybox);
+    let skyboxLoaded = false;
+    let reflectionLoaded = false;
+    let reflectionCubemap = null;
 
-  skybox.once('load', function () {
-    console.log('Skybox loaded:', skybox);
-    const cubemap = skybox.resources[1];
-    // app.scene.setSkybox(skybox.resources);
-    app.scene.skybox = cubemap;
+    function checkDone() {
+      if (skyboxLoaded && reflectionLoaded) {
+        resolve(reflectionCubemap);
+      }
+    }
+
+    // Skybox load
+    skyboxAsset.once('load', () => {
+      const skyboxCubemap = skyboxAsset.resources?.[1];
+      if (!skyboxCubemap) {
+        reject(new Error('Skybox cubemap missing'));
+        return;
+      }
+
+      app.scene.exposure = 1.4;
+      app.scene.skyboxMip = 0;
+      app.scene.skyboxIntensity = 1;
+      app.scene.ambientLight = new pc.Color(3, 3, 3);
+      app.scene.skybox = skyboxCubemap;
+      app.scene.setSkybox(skyboxAsset.resources);
+
+      skyboxLoaded = true;
+      checkDone();
+    });
+
+    // Reflection cubemap load
+    reflectionAsset.once('load', () => {
+      reflectionCubemap = reflectionAsset.resources?.[1];
+      if (!reflectionCubemap) {
+        reject(new Error('Reflection cubemap missing'));
+        return;
+      }
+
+      reflectionLoaded = true;
+      checkDone();
+    });
+
+    skyboxAsset.once('error', reject);
+    reflectionAsset.once('error', reject);
+
+    app.assets.add(skyboxAsset);
+    app.assets.add(reflectionAsset);
+
+    app.assets.load(skyboxAsset);
+    app.assets.load(reflectionAsset);
   });
-
-  app.assets.load(skybox);
 }

@@ -4,6 +4,7 @@ import { Application, Mouse, Keyboard, ElementInput, Entity, Asset } from 'playc
 import { initAmmo, loadDracoDecoder } from '../services/ammo-draco-loader';
 import { FpsPlayer } from '../services/fps-player.js';
 import { SetSkyboxDds } from '../services/set-skybox.js';
+
 import { FirstPersonCamera } from '../../public/scripts/first-person-camera.js';
 import { useNavigate } from 'react-router-dom';
 import PostOptionsPage from './Home.jsx';
@@ -120,7 +121,7 @@ const Pods = (postData) => {
   });
 
   const store1 = new pc.Asset('Pod1', 'container', {
-    url: postData.glbFile,
+    url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/model.glb',
   });
 
   const banner = new pc.Asset('banner', 'container', {
@@ -273,30 +274,24 @@ const Pods = (postData) => {
   };
 
   const setupScene = async (app, onAssetLoaded, onLoadingFailed) => {
-    // Setup skybox
+    let cubemap = null;
     try {
-      SetSkyboxDds(app, postData.skyboxFile);
+      cubemap = await SetSkyboxDds(app);
     } catch (error) {
       console.error('Error setting skybox:', error);
     }
-
-    // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       console.warn('Asset loading timed out');
       onLoadingFailed();
-    }, 60000); // 60 second timeout
-
-    // Create a promise to handle store loading
+    }, 60000);
     const storeLoadPromise = new Promise((resolve, reject) => {
       store.on('load', () => {
         try {
           const container = store.resource;
           const model = container.instantiateRenderEntity();
-
           model.findComponents('render').forEach((render) => {
             const entity = render.entity;
             render.meshInstances[0].visible = false;
-
             entity.addComponent('rigidbody', {
               type: 'static',
             });
@@ -305,96 +300,8 @@ const Pods = (postData) => {
               renderAsset: render.asset,
             });
           });
-
           app.root.addChild(model);
-
-          ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-          // const childPlane = new pc.Entity('plane1');
-          // childPlane.setLocalPosition(3.457, 1.873, -6.824); // Position relative to the parent
-          // childPlane.setLocalScale(1.5, 1.5, 1.5);
-          // childPlane.setEulerAngles(90, 0, 0);
-
-          // childPlane.addComponent('render', {
-          //   type: 'plane',
-          // });
-
-          // // Create a material for the childPlane and apply the texture directly
-          // const planeMaterial = new pc.StandardMaterial();
-
-          // // Create and load the texture directly
-          // const planeTexture = new pc.Asset('planeTexture', 'texture', {
-          //   url: 'public/images/autoImage.jpg', // Your specific image path
-          // });
-
-          // // Add the texture to assets and load it
-          // app.assets.add(planeTexture);
-          // app.assets.load(planeTexture);
-
-          // // Wait for the texture to load and then apply it
-          // planeTexture.ready(function (asset) {
-          //   planeMaterial.diffuseMap = asset.resource;
-          //   planeMaterial.update();
-          // });
-
-          // planeMaterial.diffuse = new pc.Color(1, 1, 1); // White base color
-          // planeMaterial.specular = new pc.Color(0.2, 0.2, 0.2); // Low specular reflection
-          // planeMaterial.shininess = 30; // Medium shininess
-          // planeMaterial.useMetalness = false;
-
-          // childPlane.render.material = planeMaterial;
-
-          // childPlane.render.castShadows = true;
-          // childPlane.render.castShadowsLightmap = true;
-          // childPlane.render.receiveShadows = true;
-
-          // if (model.children && model.children.length >= 5) {
-          //   model.children[4].addChild(childPlane);
-          // }
-          /////////////////////////////////////       VIDEO     //////////////////////////////////////////////////////////////////////
-
-          const leftChildPlane = new pc.Entity('plane2');
-          leftChildPlane.setLocalPosition(-6.784, 2.1, 3.323);
-          leftChildPlane.setLocalScale(1.79, 1.3, 1.15);
-          leftChildPlane.setEulerAngles(90, 90, 0);
-          leftChildPlane.addComponent('render', {
-            type: 'plane',
-          });
-
-          // Create a video element
-          const video = document.createElement('video');
-          video.src = 'public/rabbitmm.mp4';
-          video.loop = true;
-          video.muted = true;
-          video.autoplay = true;
-          video.play();
-
-          // Create a texture from the video
-          const videoTexture = new pc.Texture(app.graphicsDevice);
-          videoTexture.setSource(video);
-
-          // Create material with video texture
-          const videoMaterial = new pc.StandardMaterial();
-          videoMaterial.diffuseMap = videoTexture;
-          videoMaterial.update();
-
-          // Apply material to the plane
-          leftChildPlane.render.material = videoMaterial;
-
-          // Update the texture each frame
-          app.on('update', function () {
-            videoTexture.setSource(video);
-          });
-
-          leftChildPlane.render.castShadows = true;
-          leftChildPlane.render.castShadowsLightmap = true;
-          leftChildPlane.render.receiveShadows = true;
-
-          if (model.children && model.children.length >= 4) {
-            model.children[3].addChild(leftChildPlane);
-          }
-          /////////////////////////////////////       VIDEO    //////////////////////////////////////////////////////////////////////////
-
-          onAssetLoaded(); // Track loading progress
+          onAssetLoaded();
           resolve(model);
         } catch (error) {
           console.error('Error processing Base_Cube.glb:', error);
@@ -408,16 +315,30 @@ const Pods = (postData) => {
       });
     });
 
-    // Add the store asset and start loading
     app.assets.add(store);
     app.assets.load(store);
-
     const store1LoadPromise = new Promise((resolve) => {
       store1.on('load', () => {
         const container = store1.resource;
         const model = container.instantiateRenderEntity();
-        const nodes = container.data.gltf.nodes;
-        const renders = model.findComponents('render');
+        console.log('Store 1 Model >>>', model);
+        const outerFloor = model.findByName('Outer Floor.001_Baked');
+        console.log('Outer Floor :', outerFloor);
+        if (outerFloor?.render?.meshInstances?.[0]) {
+          const mat = outerFloor.render.meshInstances[0].material.clone();
+          mat.cubeMap = cubemap;
+          mat.metalness = 0.2;
+          mat.useMetalness = true;
+          mat.shininess = 60;
+          mat.reflectivity = 0.5;
+          mat.diffuse = new pc.Color(0.6, 0.6, 0.6);
+
+          mat.update();
+          outerFloor.render.meshInstances[0].material = mat;
+
+          console.log('Cubemap applied to Outer Floor');
+        }
+
         model.findComponents('render').forEach((render) => {
           const entity = render.entity;
           if (render.entity.name.includes('Wall')) {

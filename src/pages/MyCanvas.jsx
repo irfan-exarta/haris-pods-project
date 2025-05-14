@@ -148,8 +148,7 @@ function MyCanvas() {
         } else {
           console.warn('No matching podGlbUrl found for podId:', podId);
         }
-
-        // Set skybox from API response
+        //console.log('Skybox URL from API:', data.podSettingsGlobal?.skyboxUrl);
         setPodSkyBoxBuffer(data.podSettingsGlobal?.skyboxUrl);
       } catch (error) {
         console.error('Error fetching pod data:', error);

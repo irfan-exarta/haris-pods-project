@@ -46,14 +46,14 @@
 
 import * as pc from 'playcanvas';
 
-export function SetSkyboxDds(app, skyboxUrl, cubemapUrl) {
+export function SetSkyboxDds(app, postData) {
   return new Promise((resolve, reject) => {
     // Load the skybox
     const skyboxAsset = new pc.Asset(
       'skybox',
       'cubemap',
       {
-        url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/skybox.dds',
+        url: postData.podData?.podSettingsGlobal?.skyboxUrl,
       },
       {
         prefiltered: true,
@@ -68,7 +68,7 @@ export function SetSkyboxDds(app, skyboxUrl, cubemapUrl) {
       'reflection',
       'cubemap',
       {
-        url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/cubemap.dds',
+        url: postData.podData?.podSettingsGlobal?.floorCubemapUrl,
       },
       {
         prefiltered: true,
@@ -95,11 +95,10 @@ export function SetSkyboxDds(app, skyboxUrl, cubemapUrl) {
         reject(new Error('Skybox cubemap missing'));
         return;
       }
-
-      app.scene.exposure = 1.4;
-      app.scene.skyboxMip = 0;
+      //app.scene.exposure = 1.0;
+      //app.scene.skyboxMip = 1;
       app.scene.skyboxIntensity = 1;
-      app.scene.ambientLight = new pc.Color(3, 3, 3);
+      //app.scene.ambientLight = new pc.Color(0.6, 0.6, 0.6);
       app.scene.skybox = skyboxCubemap;
       app.scene.setSkybox(skyboxAsset.resources);
 

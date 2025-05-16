@@ -112,6 +112,8 @@ const Pods = (postData) => {
   const podDetails = postData.podData;
   const deviceType = pc.DEVICETYPE_WEBGL2;
 
+  console.log('podDetails ', postData.podData?.podSettingsGlobal?.skyboxUrl);
+
   // Track assets to load
   const totalAssetsToLoad = 2; // Base cube and user model
   const loadedAssets = useRef(0);
@@ -120,8 +122,15 @@ const Pods = (postData) => {
     url: '/models/Base_Cube.glb',
   });
 
+  //const store1 = new pc.Asset('Pod1', 'container', {
+  //  url: postData.podData?.podSettingsGlobal?.podGlbUrl,
+  //});
+  //const store1 = new pc.Asset('Pod1', 'container', {
+  //  url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ZenRetreat301/model.glb',
+  //});
+
   const store1 = new pc.Asset('Pod1', 'container', {
-    url: 'https://object.ord1.coreweave.com/pods-bucket/pods/ArabesqueCourtyard101/model.glb',
+    url: postData.podData?.podSettingsGlobal?.podGlbUrl,
   });
 
   const banner = new pc.Asset('banner', 'container', {
@@ -252,7 +261,6 @@ const Pods = (postData) => {
 
       newApp.start();
 
-      // Setup asset loading tracking
       const trackAssetLoading = () => {
         loadedAssets.current += 1;
         const progress = 0.5 + (loadedAssets.current / totalAssetsToLoad) * 0.5;
@@ -261,11 +269,10 @@ const Pods = (postData) => {
         if (loadedAssets.current >= totalAssetsToLoad) {
           setTimeout(() => {
             setIsLoading(false);
-          }, 500); // Give a small delay before hiding
+          }, 500);
         }
       };
 
-      // Configure scene with asset tracking
       await setupScene(newApp, trackAssetLoading, () => setIsLoading(false));
     } catch (error) {
       console.error('Game initialization error:', error);
@@ -276,7 +283,7 @@ const Pods = (postData) => {
   const setupScene = async (app, onAssetLoaded, onLoadingFailed) => {
     let cubemap = null;
     try {
-      cubemap = await SetSkyboxDds(app);
+      cubemap = await SetSkyboxDds(app, postData);
     } catch (error) {
       console.error('Error setting skybox:', error);
     }
@@ -320,24 +327,47 @@ const Pods = (postData) => {
     const store1LoadPromise = new Promise((resolve) => {
       store1.on('load', () => {
         const container = store1.resource;
+        //const container  = store1.children[0].children[2].children[6]
         const model = container.instantiateRenderEntity();
         console.log('Store 1 Model >>>', model);
-        const outerFloor = model.findByName('Outer Floor.001_Baked');
+        //const outerFloor = model.children[0].children[2].children[6];
+        //const innerFloor = model.children[0].children[2].children[0];
+        const outerFloor = model.findByName('Roof.001_Baked');
         console.log('Outer Floor :', outerFloor);
         if (outerFloor?.render?.meshInstances?.[0]) {
           const mat = outerFloor.render.meshInstances[0].material.clone();
           mat.cubeMap = cubemap;
-          mat.metalness = 0.2;
-          mat.useMetalness = true;
-          mat.shininess = 60;
-          mat.reflectivity = 0.5;
-          mat.diffuse = new pc.Color(0.6, 0.6, 0.6);
 
+          mat.cubeMapProjection = pc.CUBEPROJ_BOX;
+          mat.cubeMapProjectionBox = new pc.BoundingBox(
+            outerFloor.getPosition(),
+            new pc.Vec3(10, 10, 10),
+          );
+          mat.cubeMapProjectionCenter = outerFloor.getPosition();
+          //mat.metalness = 0.2;
+          //mat.useMetalness = true;
+          mat.shininess = 60;
+          mat.reflectivity = 0.024;
+          mat.diffuse = new pc.Color(0.6, 0.6, 0.6);
           mat.update();
           outerFloor.render.meshInstances[0].material = mat;
-
           console.log('Cubemap applied to Outer Floor');
         }
+        //if (innerFloor?.render?.meshInstances?.[0]) {
+        //  const mat = innerFloor.render.meshInstances[0].material.clone();
+        //  mat.cubeMap = cubemap;
+        //  //mat.cubeMapProjection = pc.CUBEPROJ_BOX;
+        //  //mat.cubeMapProjectionBox = new pc.Vec3(6.64, 2.93, 6.73);
+        //  //mat.cubeMapProjectionCenter = outerFloor.getPosition();
+
+        //  //mat.useMetalness = true;
+        //  mat.shininess = 60;
+        //  mat.reflectivity = 0.024;
+        //  mat.diffuse = new pc.Color(0.6, 0.6, 0.6);
+        //  mat.update();
+        //  innerFloor.render.meshInstances[0].material = mat;
+        //  console.log('Cubemap applied to Inner Floor');
+        //}
 
         model.findComponents('render').forEach((render) => {
           const entity = render.entity;
@@ -373,114 +403,114 @@ const Pods = (postData) => {
     app.assets.add(web3Tex);
     app.assets.load(web3Tex);
 
-    const bannerPromise = new Promise((resolve) => {
-      banner.on('load', () => {
-        const container = banner.resource;
-        const model = container.instantiateRenderEntity();
-        const nodes = container.data.gltf.nodes;
-        const renders = model.findComponents('render');
-        model.findComponents('render').forEach((render) => {
-          const entity = render.entity;
-          if (render.entity.name.includes('Wall')) {
-            return;
-          }
-          entity.addComponent('rigidbody', {
-            type: 'static',
-          });
-          entity.addComponent('collision', {
-            type: 'mesh',
-            renderAsset: render.asset,
-          });
-        });
+    //const bannerPromise = new Promise((resolve) => {
+    //  banner.on('load', () => {
+    //    const container = banner.resource;
+    //    const model = container.instantiateRenderEntity();
+    //    const nodes = container.data.gltf.nodes;
+    //    const renders = model.findComponents('render');
+    //    model.findComponents('render').forEach((render) => {
+    //      const entity = render.entity;
+    //      if (render.entity.name.includes('Wall')) {
+    //        return;
+    //      }
+    //      entity.addComponent('rigidbody', {
+    //        type: 'static',
+    //      });
+    //      entity.addComponent('collision', {
+    //        type: 'mesh',
+    //        renderAsset: render.asset,
+    //      });
+    //    });
 
-        const Bazaar = model.findByName('Bazaar');
+    //    const Bazaar = model.findByName('Bazaar');
 
-        const bazarmat = new pc.StandardMaterial();
-        bazarmat.diffuseMap = bazzarTex.resource;
-        bazarmat.update();
+    //    const bazarmat = new pc.StandardMaterial();
+    //    bazarmat.diffuseMap = bazzarTex.resource;
+    //    bazarmat.update();
 
-        Bazaar.render.meshInstances[0].material = bazarmat;
+    //    Bazaar.render.meshInstances[0].material = bazarmat;
 
-        const Exarta = model.findByName('Exarta');
+    //    const Exarta = model.findByName('Exarta');
 
-        const exartamat = new pc.StandardMaterial();
-        exartamat.diffuseMap = exartaTex.resource;
-        exartamat.update();
+    //    const exartamat = new pc.StandardMaterial();
+    //    exartamat.diffuseMap = exartaTex.resource;
+    //    exartamat.update();
 
-        Exarta.render.meshInstances[0].material = exartamat;
+    //    Exarta.render.meshInstances[0].material = exartamat;
 
-        const Pods = model.findByName('Pods');
+    //    const Pods = model.findByName('Pods');
 
-        const podsmat = new pc.StandardMaterial();
-        podsmat.diffuseMap = podsTex.resource;
-        podsmat.update();
+    //    const podsmat = new pc.StandardMaterial();
+    //    podsmat.diffuseMap = podsTex.resource;
+    //    podsmat.update();
 
-        Pods.render.meshInstances[0].material = podsmat;
+    //    Pods.render.meshInstances[0].material = podsmat;
 
-        const Zeniva = model.findByName('Zeniva');
+    //    const Zeniva = model.findByName('Zeniva');
 
-        const zenivamat = new pc.StandardMaterial();
-        zenivamat.diffuseMap = zenivaTex.resource;
-        zenivamat.update();
+    //    const zenivamat = new pc.StandardMaterial();
+    //    zenivamat.diffuseMap = zenivaTex.resource;
+    //    zenivamat.update();
 
-        Zeniva.render.meshInstances[0].material = zenivamat;
+    //    Zeniva.render.meshInstances[0].material = zenivamat;
 
-        const Web3 = model.findByName('Web3');
+    //    const Web3 = model.findByName('Web3');
 
-        const web3mat = new pc.StandardMaterial();
-        web3mat.diffuseMap = web3Tex.resource;
-        web3mat.update();
+    //    const web3mat = new pc.StandardMaterial();
+    //    web3mat.diffuseMap = web3Tex.resource;
+    //    web3mat.update();
 
-        Web3.render.meshInstances[0].material = web3mat;
+    //    Web3.render.meshInstances[0].material = web3mat;
 
-        const PodsVideo = model.findByName('PodsVideo');
+    //    const PodsVideo = model.findByName('PodsVideo');
 
-        const angles = PodsVideo.getLocalEulerAngles().clone();
+    //    const angles = PodsVideo.getLocalEulerAngles().clone();
 
-        PodsVideo.setLocalEulerAngles(angles.x, angles.y + 180, angles.z);
-        const video = document.createElement('video');
-        video.src = 'public/images/podsvideocopy1.mp4';
-        video.loop = true;
-        video.muted = true;
-        video.autoplay = true;
-        video.playsInline = true;
+    //    PodsVideo.setLocalEulerAngles(angles.x, angles.y + 180, angles.z);
+    //    const video = document.createElement('video');
+    //    video.src = 'public/images/podsvideocopy1.mp4';
+    //    video.loop = true;
+    //    video.muted = true;
+    //    video.autoplay = true;
+    //    video.playsInline = true;
 
-        const videoTexture = new pc.Texture(app.graphicsDevice);
-        const videoMaterial = new pc.StandardMaterial();
-        videoMaterial.diffuseMap = videoTexture;
-        videoMaterial.update();
-        PodsVideo.render.meshInstances[0].material = videoMaterial;
+    //    const videoTexture = new pc.Texture(app.graphicsDevice);
+    //    const videoMaterial = new pc.StandardMaterial();
+    //    videoMaterial.diffuseMap = videoTexture;
+    //    videoMaterial.update();
+    //    PodsVideo.render.meshInstances[0].material = videoMaterial;
 
-        function attemptPlayVideo() {
-          videoTexture.setSource(video);
-          const playPromise = video.play();
+    //    function attemptPlayVideo() {
+    //      videoTexture.setSource(video);
+    //      const playPromise = video.play();
 
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              const playOnInteraction = () => {
-                video.play().finally(() => {
-                  document.removeEventListener('touchstart', playOnInteraction);
-                  document.removeEventListener('click', playOnInteraction);
-                });
-              };
-              document.addEventListener('touchstart', playOnInteraction, { once: true });
-              document.addEventListener('click', playOnInteraction, { once: true });
-            });
-          }
-        }
+    //      if (playPromise !== undefined) {
+    //        playPromise.catch(() => {
+    //          const playOnInteraction = () => {
+    //            video.play().finally(() => {
+    //              document.removeEventListener('touchstart', playOnInteraction);
+    //              document.removeEventListener('click', playOnInteraction);
+    //            });
+    //          };
+    //          document.addEventListener('touchstart', playOnInteraction, { once: true });
+    //          document.addEventListener('click', playOnInteraction, { once: true });
+    //        });
+    //      }
+    //    }
 
-        attemptPlayVideo();
+    //    attemptPlayVideo();
 
-        app.on('update', function () {
-          if (!video.paused) {
-            videoTexture.upload();
-          }
-        });
+    //    app.on('update', function () {
+    //      if (!video.paused) {
+    //        videoTexture.upload();
+    //      }
+    //    });
 
-        app.root.addChild(model);
-        resolve(model);
-      });
-    });
+    //    app.root.addChild(model);
+    //    resolve(model);
+    //  });
+    //});
 
     // Add the store asset and start loading
     app.assets.add(store1);
@@ -505,7 +535,7 @@ const Pods = (postData) => {
       // ]);
       await storeLoadPromise;
       await store1LoadPromise;
-      await bannerPromise;
+      //await bannerPromise;
 
       onAssetLoaded();
 

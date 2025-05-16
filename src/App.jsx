@@ -1,14 +1,15 @@
 import { Route, Routes } from 'react-router-dom';
 import MyCanvas from './pages/MyCanvas';
-import Home from './pages/Home';
+import { PodsProvider } from './context/PodsContext';
 
 function App() {
   return (
     <div>
-      <Routes>
-        {/* <Route path='/' element={<Home />} /> */}
-        <Route path='/' element={<MyCanvas />} />
-      </Routes>
+      <PodsProvider>
+        <Routes>
+          <Route path='/' element={<MyCanvas />} />
+        </Routes>
+      </PodsProvider>
     </div>
   );
 }
